@@ -1,5 +1,6 @@
 import { Container, Graphics } from "pixi.js"
 
+import type { MapOverlayState } from "../input/types"
 import { TILE_SIZE, WORLD_PIXEL_HEIGHT, WORLD_PIXEL_WIDTH } from "../world/constants"
 import type { MapObject, TileCoord } from "../world/types"
 import type { World } from "../core/World"
@@ -16,8 +17,10 @@ export class MapRenderer {
   private readonly terrainLayer = new Graphics()
   private readonly gridLayer = new Graphics()
   private readonly objectLayer = new Graphics()
+  private readonly overlayLayer = new Graphics()
   private readonly spawnLayer = new Graphics()
   private lastLayout: MapLayout = { x: 0, y: 0, scale: 1 }
+  private lastOverlayKey = ""
   private lastTerrainKey = ""
   private lastWorldRevision = -1
 
@@ -26,10 +29,12 @@ export class MapRenderer {
     this.container.addChild(this.gridLayer)
     this.container.addChild(this.objectLayer)
     this.container.addChild(this.spawnLayer)
+    this.container.addChild(this.overlayLayer)
   }
 
-  sync(world: World): void {
+  sync(world: World, overlayState: MapOverlayState): void {
     const terrainKey = `${world.width}x${world.height}`
+    const overlayKey = serializeOverlayState(overlayState)
 
     if (terrainKey !== this.lastTerrainKey) {
       this.lastTerrainKey = terrainKey
@@ -41,20 +46,26 @@ export class MapRenderer {
       this.drawObjects(world)
       this.drawSpawnPoints(world.spawnPoints)
     }
+
+    if (overlayKey !== this.lastOverlayKey) {
+      this.lastOverlayKey = overlayKey
+      this.drawOverlay(overlayState)
+    }
   }
 
-  setLayout(layout: MapLayout): void {
+  setLayout(layout: MapLayout): boolean {
     if (
       this.lastLayout.x === layout.x &&
       this.lastLayout.y === layout.y &&
       this.lastLayout.scale === layout.scale
     ) {
-      return
+      return false
     }
 
     this.lastLayout = layout
     this.container.position.set(layout.x, layout.y)
     this.container.scale.set(layout.scale)
+    return true
   }
 
   destroy(): void {
@@ -127,6 +138,23 @@ export class MapRenderer {
     })
 
     this.spawnLayer.stroke({ color: 0x67e8f9, width: 2, alpha: 0.95 })
+  }
+
+  private drawOverlay(overlayState: MapOverlayState): void {
+    this.overlayLayer.clear()
+
+    if (overlayState.hoverTile && overlayState.hoverMode !== "inspect") {
+      const previewColor = overlayState.hoverIsValid
+        ? getPreviewColor(overlayState.hoverMode)
+        : 0xf87171
+      const previewAlpha = overlayState.hoverIsValid ? 0.16 : 0.08
+
+      this.drawTileHighlight(overlayState.hoverTile, previewColor, previewAlpha, 2)
+    }
+
+    if (overlayState.selection) {
+      this.drawTileHighlight(overlayState.selection.tile, 0x67e8f9, 0.12, 3)
+    }
   }
 
   private drawTree(tree: Extract<MapObject, { kind: "tree" }>): void {
@@ -204,5 +232,47 @@ export class MapRenderer {
       .fill({ color: shadowColor, alpha: 0.95 })
       .circle(originX + 15, originY + 23, 5)
       .fill({ color: itemColor, alpha: 0.95 })
+  }
+
+  private drawTileHighlight(
+    tile: TileCoord,
+    strokeColor: number,
+    fillAlpha: number,
+    strokeWidth: number
+  ): void {
+    const originX = tile.x * TILE_SIZE
+    const originY = tile.y * TILE_SIZE
+
+    this.overlayLayer
+      .roundRect(originX + 2, originY + 2, TILE_SIZE - 4, TILE_SIZE - 4, 6)
+      .fill({ color: strokeColor, alpha: fillAlpha })
+      .stroke({ color: strokeColor, alpha: 0.95, width: strokeWidth })
+  }
+}
+
+function serializeOverlayState(overlayState: MapOverlayState): string {
+  return [
+    overlayState.selection?.tile.x ?? "n",
+    overlayState.selection?.tile.y ?? "n",
+    overlayState.selection?.objectId ?? "none",
+    overlayState.hoverTile?.x ?? "n",
+    overlayState.hoverTile?.y ?? "n",
+    overlayState.hoverMode,
+    overlayState.hoverIsValid ? "1" : "0",
+  ].join(":")
+}
+
+function getPreviewColor(mode: MapOverlayState["hoverMode"]): number {
+  switch (mode) {
+    case "chop":
+      return 0xf59e0b
+    case "build-wall":
+      return 0x94a3b8
+    case "build-bed":
+      return 0x2563eb
+    case "cancel-blueprint":
+      return 0xf97316
+    case "inspect":
+      return 0x67e8f9
   }
 }

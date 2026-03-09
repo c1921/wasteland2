@@ -4,7 +4,7 @@
 
 `玩家下命令 -> 小人接任务 -> 移动到目标 -> 执行工作 -> 世界状态变化 -> 小人继续维持生存`
 
-当前仓库已完成 React + Pixi + fixed tick runtime skeleton，以及 Phase 2 的地图系统基础：固定尺寸地图、默认世界生成、基础地图渲染与地图单元测试。玩法系统仍处于待实现状态。
+当前仓库已完成 React + Pixi + fixed tick runtime skeleton、Phase 2 地图系统基础，以及 Phase 3 的相机与输入底座：固定尺寸地图、默认世界生成、可缩放平移视角、格子/对象选中与命令意图桥接。玩法闭环仍处于待实现状态。
 
 ## 当前状态
 
@@ -18,15 +18,18 @@
 - tick 计数与模拟时间累计
 - `MapGrid` 地图模型与 `Cell { terrain, object? }` 约束
 - 固定 seed 的默认世界生成：spawn 点、`12` 棵 tree、`20 meal`
-- Pixi 地图总览渲染，支持网格、object 区分与自动缩放总览
-- Vitest 地图层单元测试
+- Pixi 地图渲染支持网格、object 区分、选中高亮与命令模式预览
+- 相机支持 fit-to-world、滚轮缩放、中键拖拽与 `Space + 左键拖拽`
+- React UI 已接入命令模式切换、重置视角、选中摘要与最近一次命令意图摘要
+- Vitest 已覆盖地图层、相机数学、相机到渲染同步与命令意图映射
 
 未完成：
 
 - 角色实体与世界状态完整展示
 - 移动与寻路
+- 命令系统真正落地到世界状态：tree 标记、blueprint 放置 / 取消、job 派生
 - Job / Reservation / Needs / Build 闭环
-- 玩家输入、建造菜单、调试面板
+- 资源面板、速度控制、完整调试面板
 
 ## 技术方向
 
