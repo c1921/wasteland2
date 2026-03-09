@@ -16,6 +16,8 @@
 - [x] `MVP_SPEC.md` 已定义核心玩法边界
 - [x] `MVP_ARCHITECTURE.md` 已落地并与 spec 对齐
 - [x] React 页面壳中挂载 Pixi 画布
+- [x] `PixiGameView` 在 React `StrictMode` 重挂载下可安全初始化与清理
+- [x] 游戏面板初始化异常由局部 error boundary 承接，并支持手动重试挂载
 - [x] 固定步长 `GameLoop` 已建立，simulation tick 与 render 解耦
 - [x] `Game` 已组合 `World`、`EntityManager`、`JobManager`、`NeedSystem`、`BuildSystem`、`TickManager`
 - [x] 世界已记录 tick 计数与累计模拟时间
@@ -23,25 +25,25 @@
 
 ## 1. 地图与格子
 
-- [ ] 固定 `50 x 50` 地图
-- [ ] 固定 `32 x 32 px` 单格显示尺寸
-- [ ] 实现 `Cell { terrain, object? }` 数据结构
-- [ ] `terrain` 仅支持 `ground`
-- [ ] `object` 限定为 `tree | wall | bed | blueprint | itemPile`
-- [ ] 每格最多存在 `1` 个 object
-- [ ] 所有 object 均为 `1x1`
-- [ ] 实现阻挡规则：`tree` / `wall` 阻挡，`bed` / `blueprint` / `itemPile` 不阻挡
-- [ ] 实现 blueprint 放置规则：只能放在空的 `ground` 上
-- [ ] 支持 tile 查询、walkable 判断、buildable 判断
+- [x] 固定 `50 x 50` 地图
+- [x] 固定 `32 x 32 px` 单格显示尺寸
+- [x] 实现 `Cell { terrain, object? }` 数据结构
+- [x] `terrain` 仅支持 `ground`
+- [x] `object` 限定为 `tree | wall | bed | blueprint | itemPile`
+- [x] 每格最多存在 `1` 个 object
+- [x] 所有 object 均为 `1x1`
+- [x] 实现阻挡规则：`tree` / `wall` 阻挡，`bed` / `blueprint` / `itemPile` 不阻挡
+- [x] 实现 blueprint 放置规则：只能放在空的 `ground` 上
+- [x] 支持 tile 查询、walkable 判断、buildable 判断
 
 ## 2. 世界初始化
 
-- [ ] 默认生成 `50 x 50` 世界
+- [x] 默认生成 `50 x 50` 世界
 - [ ] 初始生成 `3` 名角色
-- [ ] 初始生成 `12` 棵 tree
-- [ ] 初始生成总量 `20 meal`
-- [ ] 角色出生在地图中心附近
-- [ ] meal piles 与 trees 按推荐区域分布
+- [x] 初始生成 `12` 棵 tree
+- [x] 初始生成总量 `20 meal`
+- [x] 角色出生在地图中心附近
+- [x] meal piles 与 trees 按推荐区域分布
 - [ ] 支持先用 `1` 名角色调试，再切回 `2 ~ 3` 名角色做并发验证
 
 ## 3. 单位数据、移动与寻路
@@ -121,8 +123,8 @@
 
 ## 8. 渲染、输入与可观测性
 
-- [ ] 地图按 `32 x 32` 网格可视化
-- [ ] `tree` / `wall` / `bed` / `blueprint` / `itemPile` 有基础视觉区分
+- [x] 地图按 `32 x 32` 网格可视化
+- [x] `tree` / `wall` / `bed` / `blueprint` / `itemPile` 有基础视觉区分
 - [ ] 角色位置与移动过程可视化
 - [ ] 支持选中格子或对象
 - [ ] 提供选中对象信息面板
@@ -157,7 +159,7 @@
 
 - [x] Phase 0：规格定义
 - [x] Phase 1：项目骨架
-- [ ] Phase 2：地图系统
+- [x] Phase 2：地图系统
 - [ ] Phase 3：相机与输入
 - [ ] Phase 4：实体系统
 - [ ] Phase 5：移动与寻路

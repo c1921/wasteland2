@@ -1,0 +1,15 @@
+export const MAP_WIDTH = 50
+export const MAP_HEIGHT = 50
+export const TILE_SIZE = 32
+
+export const INITIAL_PAWN_COUNT = 3
+export const INITIAL_TREE_COUNT = 12
+export const INITIAL_MEAL_TOTAL = 20
+export const INITIAL_MEAL_PILE_SIZE = 5
+export const INITIAL_MEAL_PILE_COUNT =
+  INITIAL_MEAL_TOTAL / INITIAL_MEAL_PILE_SIZE
+
+export const DEFAULT_WORLD_SEED = 4201337
+
+export const WORLD_PIXEL_WIDTH = MAP_WIDTH * TILE_SIZE
+export const WORLD_PIXEL_HEIGHT = MAP_HEIGHT * TILE_SIZE

@@ -4,20 +4,26 @@
 
 `玩家下命令 -> 小人接任务 -> 移动到目标 -> 执行工作 -> 世界状态变化 -> 小人继续维持生存`
 
-当前仓库已完成 React + Pixi + fixed tick runtime skeleton，玩法系统仍处于待实现状态。
+当前仓库已完成 React + Pixi + fixed tick runtime skeleton，以及 Phase 2 的地图系统基础：固定尺寸地图、默认世界生成、基础地图渲染与地图单元测试。玩法系统仍处于待实现状态。
 
 ## 当前状态
 
 已完成：
 
 - React 页面壳与 Pixi 画布挂载
+- `PixiGameView` 生命周期已兼容 React `StrictMode` 重挂载，避免半初始化 `Application` 清理崩溃
+- 游戏面板初始化失败时由局部 error boundary 承接，并支持手动 `Retry`
 - `GameLoop` 固定 tick 驱动
 - `Game` 组合世界、管理器与系统骨架
 - tick 计数与模拟时间累计
+- `MapGrid` 地图模型与 `Cell { terrain, object? }` 约束
+- 固定 seed 的默认世界生成：spawn 点、`12` 棵 tree、`20 meal`
+- Pixi 地图总览渲染，支持网格、object 区分与自动缩放总览
+- Vitest 地图层单元测试
 
 未完成：
 
-- 地图、实体与渲染层
+- 角色实体与世界状态完整展示
 - 移动与寻路
 - Job / Reservation / Needs / Build 闭环
 - 玩家输入、建造菜单、调试面板

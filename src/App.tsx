@@ -1,3 +1,4 @@
+import { PixiGameErrorBoundary } from "@/game/PixiGameErrorBoundary"
 import { PixiGameView } from "@/game/PixiGameView"
 
 export function App() {
@@ -8,22 +9,22 @@ export function App() {
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.35em] text-cyan-300/80">
-                Phase 1
+                Phase 2
               </p>
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight text-white">
-                  Wasteland Runtime Skeleton
+                  Wasteland Map System
                 </h1>
                 <p className="max-w-2xl text-sm leading-6 text-slate-300">
-                  React owns the shell. Pixi owns the canvas. Simulation ticks
-                  run on a fixed clock, separate from render.
+                  The world now boots with a deterministic 50x50 grid, seeded
+                  resource layout, and a scale-to-fit overview rendered in Pixi.
                 </p>
               </div>
             </div>
             <div className="grid gap-2 text-left font-mono text-xs text-slate-300 md:text-right">
-              <div>simulation: fixed 10 TPS</div>
-              <div>render: requestAnimationFrame</div>
-              <div>status: check the dev console for tick logs</div>
+              <div>world: 50 x 50 tiles @ 32px logic size</div>
+              <div>spawn: 3 markers, 12 trees, 20 meal</div>
+              <div>view: auto-fit overview, camera later</div>
             </div>
           </div>
         </header>
@@ -33,29 +34,31 @@ export function App() {
             <div className="space-y-5">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  Architecture
+                  Phase 2 scope
                 </p>
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-200">
-                  <li>`Game` composes world, managers, and systems.</li>
-                  <li>`GameLoop` accumulates delta and drives fixed ticks.</li>
-                  <li>React does not store simulation state.</li>
+                  <li>`World` owns `MapGrid`, spawn points, and summary data.</li>
+                  <li>`MapRenderer` draws terrain, objects, and spawn markers.</li>
+                  <li>Input, camera control, and pawns stay out of scope.</li>
                 </ul>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  Phase 1 checks
+                  Validation targets
                 </p>
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-200">
-                  <li>Pixi canvas mounts inside the page shell.</li>
-                  <li>Tick logs advance at a stable cadence.</li>
-                  <li>Future systems can plug into `Game.tick()`.</li>
+                  <li>Initial world generation is deterministic from a fixed seed.</li>
+                  <li>Blocking vs non-blocking objects follow the MVP spec.</li>
+                  <li>The whole map stays visible as the canvas resizes.</li>
                 </ul>
               </div>
             </div>
           </aside>
 
           <div className="min-h-[540px] overflow-hidden rounded-[32px] border border-cyan-300/20 bg-slate-950/55 shadow-2xl shadow-cyan-950/30">
-            <PixiGameView className="h-full min-h-[540px] w-full" />
+            <PixiGameErrorBoundary className="h-full min-h-[540px] w-full">
+              <PixiGameView className="h-full min-h-[540px] w-full" />
+            </PixiGameErrorBoundary>
           </div>
         </section>
       </main>

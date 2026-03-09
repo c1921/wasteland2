@@ -5,9 +5,14 @@ import { JobManager } from "./core/JobManager"
 import { TickManager } from "./core/TickManager"
 import { World } from "./core/World"
 import { GameLoop } from "./GameLoop"
+import { MapRenderer } from "./render/MapRenderer"
 import { BuildSystem } from "./systems/BuildSystem"
 import { NeedSystem } from "./systems/NeedSystem"
 import type { GameConfig, GameContext } from "./types"
+import {
+  WORLD_PIXEL_HEIGHT,
+  WORLD_PIXEL_WIDTH,
+} from "./world/constants"
 
 const DEFAULT_GAME_CONFIG: Required<GameConfig> = {
   tickRate: 10,
@@ -31,9 +36,11 @@ export class Game {
   readonly buildSystem = new BuildSystem()
   readonly tickManager = new TickManager()
   readonly sceneRoot = new Container()
+  readonly mapRenderer = new MapRenderer()
   readonly gameLoop: GameLoop
 
   private readonly sceneFrame = new Graphics()
+  private readonly statusBackdrop = new Graphics()
   private readonly statusText = new Text({
     text: "",
     style: {
@@ -65,6 +72,8 @@ export class Game {
     }
 
     this.sceneRoot.addChild(this.sceneFrame)
+    this.sceneRoot.addChild(this.mapRenderer.container)
+    this.sceneRoot.addChild(this.statusBackdrop)
     this.sceneRoot.addChild(this.statusText)
     this.app.stage.addChild(this.sceneRoot)
 
@@ -102,6 +111,7 @@ export class Game {
       this.sceneRoot.parent.removeChild(this.sceneRoot)
     }
 
+    this.mapRenderer.destroy()
     this.sceneRoot.destroy({ children: true })
     this.destroyed = true
   }
@@ -129,6 +139,7 @@ export class Game {
     }
 
     const didResize = this.syncSceneLayout()
+    this.mapRenderer.sync(this.world)
     const roundedAlpha = Math.round(alpha * 10) / 10
 
     if (didResize || roundedAlpha !== this.lastRenderAlpha) {
@@ -160,21 +171,56 @@ export class Game {
       .fill({ color: 0x0f172a, alpha: 0.32 })
       .stroke({ color: 0x67e8f9, width: 2, alpha: 0.75 })
 
+    const viewportPadding = 24
+    const viewportWidth = Math.max(panelWidth - viewportPadding * 2, 64)
+    const viewportHeight = Math.max(panelHeight - viewportPadding * 2, 64)
+    const viewportScale = Math.min(
+      viewportWidth / WORLD_PIXEL_WIDTH,
+      viewportHeight / WORLD_PIXEL_HEIGHT
+    )
+    const scaledWorldWidth = WORLD_PIXEL_WIDTH * viewportScale
+    const scaledWorldHeight = WORLD_PIXEL_HEIGHT * viewportScale
+
+    this.mapRenderer.setLayout({
+      x: inset + (panelWidth - scaledWorldWidth) / 2,
+      y: inset + (panelHeight - scaledWorldHeight) / 2,
+      scale: viewportScale,
+    })
+
     this.statusText.x = inset + 24
     this.statusText.y = inset + 20
-    this.statusText.style.wordWrapWidth = Math.max(panelWidth - 48, 160)
+    this.statusText.style.wordWrapWidth = Math.min(
+      Math.max(panelWidth - 48, 160),
+      340
+    )
+
+    this.statusBackdrop
+      .clear()
+      .roundRect(this.statusText.x - 12, this.statusText.y - 10, 308, 174, 18)
+      .fill({ color: 0x020617, alpha: 0.72 })
+      .stroke({ color: 0x67e8f9, alpha: 0.35, width: 1 })
 
     return true
   }
 
   private updateDebugText(): void {
+    const worldSummary = this.world.getSummary()
+    const mealPileCount = worldSummary.objectCounts.itemPile
+
     const nextDebugText = [
-      "Wasteland runtime online",
+      "Wasteland map system online",
+      `seed: ${this.world.seed}`,
+      `map: ${this.world.width} x ${this.world.height} tiles`,
+      `spawn: ${worldSummary.spawnCount}`,
+      `trees: ${worldSummary.objectCounts.tree}`,
+      `meal piles: ${mealPileCount}`,
+      `meal total: ${worldSummary.itemTotals.meal}`,
       `tick rate: ${this.config.tickRate} TPS`,
       `ticks executed: ${this.tickManager.currentTick}`,
       `sim time: ${(this.tickManager.elapsedMilliseconds / 1000).toFixed(1)}s`,
       `render alpha: ${this.lastRenderAlpha.toFixed(1)}`,
       `canvas: ${this.lastScreenWidth} x ${this.lastScreenHeight}`,
+      `world px: ${WORLD_PIXEL_WIDTH} x ${WORLD_PIXEL_HEIGHT}`,
     ].join("\n")
 
     if (nextDebugText === this.lastDebugText) {
